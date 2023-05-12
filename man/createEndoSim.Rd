@@ -16,5 +16,5 @@ An EndoSim object
 }
 \description{
 This function initialises an EndoSim object with initial settings. It requires age range and
-kepted.
+number of iterations.
 }
