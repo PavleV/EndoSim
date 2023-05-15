@@ -1,7 +1,6 @@
 # create EndoSim class
 
-setClass("EndoSim", slots=list(iter_num="numeric",age_range="numeric",result="matrix"), validity = check_endosim)
-
+# validity method for EndoSim class
 check_endosim <- function(object){
 
   errors <- character()
@@ -17,6 +16,7 @@ check_endosim <- function(object){
 }
 
 
+setClass("EndoSim", slots=list(iter_num="numeric",age_range="numeric",result="matrix"), validity = check_endosim)
 
 
 
@@ -29,9 +29,18 @@ check_endosim <- function(object){
 #' @param age_range Range of ages
 #' @return An EndoSim object
 #' @export
-createEndoSim <- function(iter_num=1000,age_range=20:45){
+createEndoSim <- function(iter_num=1000,age_range=c(20,45)){
 
-  new("EndoSim",iter_num=iter_num,age_range=age_range,result=matrix(0,2,2))
+  simulation <- FUN.simulation3(ages = age_range[1]:age_range[2],
+                                number.of.cases=iter_num,
+                                aneuploid.table = Aneuploid_table_fitted_3day_210212,
+                                space.UI = 3, space.SI = 12, LB.adjust = F,
+                                LB.adjust.risk= 0.02, PL.adjust = T, PL.adjust.risk= 0.04,
+                                reset.endo = F,PL.adjust.factor=10000,adjust.history = F)
+
+  new("EndoSim",iter_num=iter_num,age_range=age_range,result=simulation[[1]])
+
+
 
 }
 
