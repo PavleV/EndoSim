@@ -1,10 +1,10 @@
 Package: EndoSim
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Endometrial Cycle Simulations
 Version: 0.1.0
 Author: Pavle Vrljicak
 Maintainer: The package maintainer <pavle.vrljicak@gmail.com>
-Description: More about what it does (maybe more than one line)
+Description: EndoSim creates simulations of endometrial cycles.
     Use four spaces when indenting paragraphs within the Description.
 License: What license is it under?
 Encoding: UTF-8
