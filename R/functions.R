@@ -369,116 +369,86 @@ FUN.simulation3 <- function(ages = 20:45, number.of.cases = 1000, beta.shape1 = 
 }
 
 
+## Simulation function tracking all variables as list items.
 
-#
+FUN.simulation4 <- function(ages = 20:45, number.of.cases = 1000, beta.shape1 = 1, beta.shape2 = 30,
+                            aneuploid.table= Aneuploid_table_fitted_3day_210212, space.UI = 3, space.SI = 12,
+                            LB.adjust = T, LB.adjust.risk= 0, PL.adjust = T, PL.adjust.risk= 0,
+                            reset.endo = F, reset.prob = 0.1, adjust.history = F, PL.adjust.factor=1000){
 
-FUN.summary <- function(mysim=test.simulation, ages=20:45){
+  # set up result matrices.
+  # Main outcome matrix keeps track of UI and SI events with each cycle.
+  # PrevLosses matrix keeps track of number of previous losses.
 
-  result <- data.frame(PrevLosses=numeric(), Count=numeric(), Age=numeric(), Outcome=character())
+  outcome <- matrix(NA,nrow=number.of.cases,ncol = length(ages)*12)
+  result.embryo <- matrix(NA,nrow=number.of.cases,ncol = length(ages)*12)
+  result.endometrium <- matrix(NA,nrow=number.of.cases,ncol = length(ages)*12)
+  result.prevLosses <- matrix(0,nrow=number.of.cases,ncol = length(ages)*12)
 
-  for(i in 1:(max(ages)-min(ages))){
+  # set baseline number of previous births and losses (0)
+  # set previous outcome ("NP") and openness based on spacing to previous UI/SI.
+  prevLB.count <- rep(0,number.of.cases)
+  prevPL.count <- rep(0,number.of.cases)
+  spacing.SI <- rep(T,number.of.cases)
+  spacing.UI <- rep(T,number.of.cases)
 
-    this.start <- i*12
-    this.end <- this.start + 11
+  # set baseline endometrium error probability representing background risk factors
 
-    mysim1 <- mysim[[1]][,this.start:this.end]
-    mysim2 <- mysim[[2]][,this.start:this.end]
+  endoerror.prob.base <- rbeta(number.of.cases,beta.shape1,beta.shape2)
 
-    this.UI.result <- melt(table(mysim2[which(mysim1 == "UI")]))
-    this.UI.result <- mutate(this.UI.result,Age=ages[i],Outcome="UI")
-    colnames(this.UI.result) <- c("PrevLosses","Count","Age","Outcome")
+  # set baseline endometrium error probability based on history
 
-    this.SI.result <- melt(table(mysim2[which(mysim1 == "SI")]))
-    this.SI.result <- mutate(this.SI.result,Age=ages[i],Outcome="SI")
-    colnames(this.SI.result) <- c("PrevLosses","Count","Age","Outcome")
+  endoerror.prob.history <- rep(0,number.of.cases)
 
-    result <- rbind(result,this.UI.result,this.SI.result)
+  # loop through the cycles assuming 12 cycles per year
+  for(i in 1:ncol(outcome)){
+
+    column.age <- min(ages)+floor(i/12) # round current cycle number to obtain maternal age
+
+    is.open <- FUN.open.byAge(rep(column.age,number.of.cases)) & FUN.open.byPrevLB(prevLB.count) & spacing.SI & spacing.UI # determine openness
+
+    is.embryoerror <- FUN.aneuploidy(rep(column.age,number.of.cases)) # determine abnormal embryo based on maternal age
+
+    #if(reset.endo){endoerror.prob <- rbeta(number.of.cases,beta.shape1,beta.shape2)}# optional reset of abnormal endometrium probability to random value from binomial dist
+
+    if(adjust.history & i > 1){
+      endoerror.prob.history <- FUN.adjust.history(original.risk = endoerror.prob.history, prevLosses = prevPL.count, PL.adjust.factor = PL.adjust.factor)
+    } # optional adjustment of abnormal endometrium probability based on number of previous losses
+
+    endoerror.prob <- endoerror.prob.base + endoerror.prob.history
+
+    is.endoerror <- FUN.endoerror(endoerror.prob) # determine abnormal endometrium based on probability
+
+    outcome[,i] <- FUN.outcome(is.endoerror, is.embryoerror, is.open) # combine information on abnormal endometrium, embryo and openness
+    result.embryo[,i] <- is.embryoerror
+    result.endometrium[,i] <- is.endoerror
+
+    # increase previous live birth and loss counts depending on outcome to be used in next cycle
+
+    prevLB.count[outcome[,i] == "SI"] <- prevLB.count[outcome[,i] == "SI"] + 1
+
+    prevPL.count[outcome[,i] == "UI"] <- prevPL.count[outcome[,i] == "UI"] + 1
+
+    # update matrix of previous losses
+    if(i < ncol(outcome)){result.prevLosses[,i+1] <- prevPL.count}
+
+    # adjust abnormal endometrium risk to be used in next cycle based on previous outcome.
+
+    endoerror.prob.history <- FUN.adjust(original.risk = endoerror.prob.history, prevOutcome = outcome[,i], PL.adjust.risk = PL.adjust.risk, PL.adjust = PL.adjust,  LB.adjust.risk = LB.adjust.risk, LB.adjust = LB.adjust )
+
+    spacing.SI <- FUN.spacing(column=i,mydata=outcome,event="SI",spacing=space.SI)# check spacing of SI
+
+    spacing.UI <- FUN.spacing(column=i,mydata=outcome,event="UI",spacing=space.UI)# check spacing of UI
+
+    #
+    if(reset.endo){
+      is.reset <- rbinom(number.of.cases, 1, reset.prob)
+      endoerror.prob.base[as.logical(is.reset)] <- rbeta(sum(is.reset),beta.shape1,beta.shape2)
+    }
 
   }
 
-  result
+  list(outcome,result.prevLosses,result.embryo,result.endometrium)
 
 }
-
-#
-
-FUN.summary.history <- function(mysim=test.simulation, ages=20:45){
-
-  result.history <- matrix("NP", nrow=nrow(mysim[[1]]), ncol=ncol(mysim[[1]]))
-  column.history <- rep("NP",nrow(result.history))
-
-  for(i in 2:(ncol(result.history)-1)){
-
-    column.history[mysim[[1]][,i-1] != "NP"] <- paste(column.history[mysim[[1]][,i-1] != "NP"],mysim[[1]][mysim[[1]][,i-1] != "NP",i-1],sep=",")
-    result.history[mysim[[1]][,i] != "NP",i] <- column.history[mysim[[1]][,i] != "NP"]
-
-  }
-
-  result <- data.frame(History=numeric(), Count=numeric(), Age=numeric(), Outcome=character())
-
-  for(i in 1:(max(ages)-min(ages))){
-
-    this.start <- i*12
-    this.end <- this.start + 11
-
-    mysim1 <- mysim[[1]][,this.start:this.end]
-    mysim3 <- stringr::str_sub(result.history[,this.start:this.end],-14)
-
-    this.UI.result <- melt(table(mysim3[which(mysim1 == "UI")]))
-    this.UI.result <- mutate(this.UI.result,Age=ages[i],Outcome="UI")
-    colnames(this.UI.result) <- c("History","Count","Age","Outcome")
-
-    this.SI.result <- melt(table(mysim3[which(mysim1 == "SI")]))
-    this.SI.result <- mutate(this.SI.result,Age=ages[i],Outcome="SI")
-    colnames(this.SI.result) <- c("History","Count","Age","Outcome")
-
-    result <- rbind(result,this.UI.result,this.SI.result)
-
-  }
-
-  result
-
-}
-
-
-#
-
-FUN.graphdata <- function(mydata=test.sum){
-
-  mydata.total2 <- mydata %>% group_by(Age, PrevLosses) %>% summarise(Total = sum(Count))
-
-  mydata.sum2.SI <- subset(mydata, Outcome == "SI")
-
-  mydata.merged2 <- merge(mydata.total2,mydata.sum2.SI, by= c("Age","PrevLosses"), all = T)
-
-  mydata.merged2$Count[is.na(mydata.merged2$Count)] <- 0
-
-  mydata.merged2$LB.ratio <- mydata.merged2$Count / mydata.merged2$Total
-
-  mydata.merged2 <- mydata.merged2[,c("Age","PrevLosses","LB.ratio")]
-
-  mydata.merged2
-
-}
-
-#
-
-FUN.graphdata.history <- function(mydata=test.sum){
-
-  mydata.total2 <- mydata %>% group_by(Age, History) %>% summarise(Total = sum(Count))
-
-  mydata.sum2.SI <- subset(mydata, Outcome == "SI")
-
-  mydata.merged2 <- merge(mydata.total2,mydata.sum2.SI, by= c("Age","History"), all = T)
-
-  mydata.merged2$Count[is.na(mydata.merged2$Count)] <- 0
-
-  mydata.merged2$LB.ratio <- mydata.merged2$Count / mydata.merged2$Total
-
-  mydata.merged2 <- mydata.merged2[,c("Age","History","LB.ratio")]
-
-  mydata.merged2
-
-}
-
 

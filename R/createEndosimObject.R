@@ -34,7 +34,7 @@ createEndoSim <- function(iter_num=1000,age_range=c(20,45), space_SI = 12){
 
   suppressWarnings({
 
-  simulation <- FUN.simulation3(ages = age_range[1]:age_range[2],
+  simulation <- FUN.simulation4(ages = age_range[1]:age_range[2],
                                 number.of.cases=iter_num,
                                 aneuploid.table = Aneuploid_table_fitted_3day_210212,
                                 space.UI = 3, space.SI = space_SI, LB.adjust = F,
@@ -42,7 +42,7 @@ createEndoSim <- function(iter_num=1000,age_range=c(20,45), space_SI = 12){
                                 reset.endo = F,PL.adjust.factor=10000,adjust.history = F)
   })
 
-  new("EndoSim",iter_num=iter_num,age_range=age_range,simulation=list(outcome=simulation[[1]],losses=simulation[[2]]))
+  new("EndoSim",iter_num=iter_num,age_range=age_range,simulation=list(outcome=simulation[[1]],losses=simulation[[2]],Abembryo=simulation[[3]],Abendometrium=simulation[[4]]))
 
 
 
