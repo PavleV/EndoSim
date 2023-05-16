@@ -1,51 +1,53 @@
 # set of functions for sampling the simulated population
 
 
-#' Create an EndoSim simulation object
+#' Sampling an EndoSim simulation object
 #'
-#' This function initialises an EndoSim object with initial settings. It requires age range and
+#' This function samples an EndoSim object. It requires age range and
 #' number of iterations.
 #'
-#' @param obj A simulation object (required).
-#' @param sample_size Number of biopsies to retrieve from simulation.
+#' @param summary_data A simulation summary table (required).
+#' @param sample_size Number of biopsies to retrieve from simulation. Default NULL.
 #' @param ages Age range for sampling.
 #' @param num_prev_losses Number of previous losses for sampling.
 #' @param seed Set seed. Default NULL.
 #' @return Table of biopsies
 #' @export
-sampleEndoSim <- function(obj, sample_size = NULL, ages=c(30,40), num_prev_losses = 1:5, seed = NULL){
+sampleEndoSim <- function(summary_data, sample_size = NULL, ages=c(30,40), num_prev_losses = 1:5, seed = NULL){
 
-  # sample rows and columns
-
-  if(!is.null(sample_size)){
-    if(obj@iter_num < sample_size){
-      return(cat("Error. Sample size cannot be larger than number of iterations."))
-    }
-    observation_row <- sample(1:obj@iter_num, size=sample_size)
-    data_sampled <- obj@simulation$outcome[observation_row,]
-  }else{
-    data_sampled <- obj@simulation$outcome
-    sample_size <- nrow(data_sampled)
+  if(!is.null(seed)){
+    set.seed(1984)
   }
 
-  cycle_col <- sample(1:(length(obj@age_range[1]:obj@age_range[2])*12),size=sample_size,replace=T)
+  subdata <- subset(summary_data, Col.num >= ages[1] & Col.num <= ages[2] & History <= 5 & cyclesToOutcome <= 24)
 
-  cycles_to_outcome <- matrix(NA,nrow=nrow(data_sampled),ncol=312)
+  observation_order <- sample(unique(subdata$Row.num))
 
-  for(i in (312-1):1){
+  result <- data.frame(Row.num=numeric(),Col.num=numeric(),Outcome=character(),History=numeric(),AbEmbryo=logical(),AbEndometrium=logical(),futureOutcome=character(),cyclesToOutcome=numeric())
 
-    cycles_to_outcome[data_sampled[,i+1] != "NP",i] <- 1
-    cycles_to_outcome[data_sampled[,i+1] == "NP",i] <- cycles_to_outcome[data_sampled[,i+1] == "NP",i+1] + 1
+  for(i in observation_order){
+
+    this.subdata <- subdata[subdata$Row.num == i,]
+    this.subdata <- this.subdata[sample(1:nrow(this.subdata),1),]
+
+    result <- rbind(result,this.subdata)
 
   }
 
-  return(cycles_to_outcome)
+  return(result)
 
 }
 
-cycleToOutcome <- function(obj){
 
-  # sample rows and columns
+
+#' Tabulate number of cycles to future outcome in an EndoSim simulation object
+#'
+#' This function tabulates the number of cycles to future outcome for any given cycle in an EndoSim simulation object.
+#'
+#' @param obj An outcome slot from simulation object (required).
+#' @return Table of number of cycles to next outcome
+#' @export
+cycleToOutcome <- function(obj){
 
   cycles_to_outcome <- matrix(NA,nrow=nrow(obj),ncol=ncol(obj))
 
@@ -61,7 +63,13 @@ cycleToOutcome <- function(obj){
 }
 
 
-
+#' Tabulate future outcome in an EndoSim simulation object
+#'
+#' This function tabulates the future outcome for any given cycle in an EndoSim simulation object.
+#'
+#' @param sim An outcome slot from simulation object (required).
+#' @return Table of future outcomes
+#' @export
 futureEndoSim <- function(sim){
 
   result <- matrix(NA,nrow(sim),ncol(sim))
@@ -75,5 +83,21 @@ futureEndoSim <- function(sim){
   }
 
   return(result)
+
+}
+
+
+summaryEndoSim <- function(outcome,losses,Abembryo,Abendometrium,futureOutcome,cyclesToOutcome){
+
+  melted_outcome <- reshape2::melt(outcome)
+  melted_losses <- reshape2::melt(losses)
+  melted_Abembryo <- reshape2::melt(Abembryo)
+  melted_Abendometrium <- reshape2::melt(Abendometrium)
+  melted_futureOutcome <- reshape2::melt(futureOutcome)
+  melted_cyclesToOutcome <- reshape2::melt(cyclesToOutcome)
+
+  combined_table <- data.frame(Row.num=melted_outcome$Var1,Col.num=melted_outcome$Var2,Outcome=melted_outcome$value,History=melted_losses$value,AbEmbryo=melted_Abembryo$value,AbEndometrium=melted_Abendometrium$value,futureOutcome=melted_futureOutcome$value,cyclesToOutcome=melted_cyclesToOutcome$value)
+
+  return(combined_table)
 
 }

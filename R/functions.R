@@ -1,6 +1,4 @@
-
 # load data
-
 
 data("Aneuploid_table_fitted_3day_210212")
 

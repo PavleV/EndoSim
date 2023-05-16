@@ -2,20 +2,20 @@
 % Please edit documentation in R/sampling.R
 \name{sampleEndoSim}
 \alias{sampleEndoSim}
-\title{Create an EndoSim simulation object}
+\title{Sampling an EndoSim simulation object}
 \usage{
 sampleEndoSim(
-  data,
-  sample_size = 100,
+  summary_data,
+  sample_size = NULL,
   ages = c(30, 40),
   num_prev_losses = 1:5,
   seed = NULL
 )
 }
 \arguments{
-\item{data}{A simulation object (required).}
+\item{summary_data}{A simulation summary table (required).}
 
-\item{sample_size}{Number of biopsies to retrieve from simulation.}
+\item{sample_size}{Number of biopsies to retrieve from simulation. Default NULL.}
 
 \item{ages}{Age range for sampling.}
 
@@ -27,6 +27,6 @@ sampleEndoSim(
 Table of biopsies
 }
 \description{
-This function initialises an EndoSim object with initial settings. It requires age range and
+This function samples an EndoSim object. It requires age range and
 number of iterations.
 }
