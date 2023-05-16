@@ -1,7 +1,8 @@
 
 # load data
 
-Aneuploid_table_fitted_3day_210212 <- as.data.frame(load("data/Aneuploid_table_fitted_3day.rda"))
+
+data("Aneuploid_table_fitted_3day_210212")
 
 # required packages
 
@@ -161,7 +162,9 @@ FUN.simulation <- function(ages = 20:45, number.of.cases = 1000, beta.shape1 = 1
   # Main result matrix keeps track of UI and SI events with each cycle.
   # PrevLosses matrix keeps track of number of previous losses.
 
-  result <- matrix(NA,nrow=number.of.cases,ncol = length(ages)*12)
+  outcome <- matrix(NA,nrow=number.of.cases,ncol = length(ages)*12)
+  result.embryo <- matrix(NA,nrow=number.of.cases,ncol = length(ages)*12)
+  result.endometrium <- matrix(NA,nrow=number.of.cases,ncol = length(ages)*12)
   result.prevLosses <- matrix(0,nrow=number.of.cases,ncol = length(ages)*12)
 
   # set baseline number of previous births and losses (0)
@@ -170,13 +173,12 @@ FUN.simulation <- function(ages = 20:45, number.of.cases = 1000, beta.shape1 = 1
   prevPL.count <- rep(0,number.of.cases)
   spacing.SI <- rep(T,number.of.cases)
   spacing.UI <- rep(T,number.of.cases)
-  #prevOutcome <- rep("NP",number.of.cases)
 
   # set baseline endometrium error probability based on beta distribution parameters
   endoerror.prob <- rbeta(number.of.cases,beta.shape1,beta.shape2)
 
   # loop through the cycles assuming 12 cycles per year
-  for(i in 1:ncol(result)){
+  for(i in 1:ncol(outcome)){
 
     column.age <- min(ages)+floor(i/12) # round current cycle number to obtain maternal age
 
@@ -192,28 +194,30 @@ FUN.simulation <- function(ages = 20:45, number.of.cases = 1000, beta.shape1 = 1
 
     is.endoerror <- FUN.endoerror(endoerror.prob) # determine abnormal endometrium based on probability
 
-    result[,i] <- FUN.outcome(is.endoerror, is.embryoerror, is.open) # combine information on abnormal endometrium, embryo and openness
+    outcome[,i] <- FUN.outcome(is.endoerror, is.embryoerror, is.open) # combine information on abnormal endometrium, embryo and openness
+    result.embryo[,i] <- is.embryoerror
+    result.endometrium[,i] <- is.endoerror
 
     # increase previous live birth and loss counts depending on outcome to be used in next cycle
 
-    prevLB.count[result[,i] == "SI"] <- prevLB.count[result[,i] == "SI"] + 1
+    prevLB.count[outcome[,i] == "SI"] <- prevLB.count[outcome[,i] == "SI"] + 1
 
-    prevPL.count[result[,i] == "UI"] <- prevPL.count[result[,i] == "UI"] + 1
+    prevPL.count[outcome[,i] == "UI"] <- prevPL.count[outcome[,i] == "UI"] + 1
 
     # update matrix of previous losses
-    if(i < ncol(result)){result.prevLosses[,i+1] <- prevPL.count}
+    if(i < ncol(outcome)){result.prevLosses[,i+1] <- prevPL.count}
 
     # adjust abnormal endometrium risk to be used in next cycle based on previous outcome.
 
-    endoerror.prob <- FUN.adjust(original.risk = endoerror.prob, prevOutcome = result[,i], PL.adjust.risk = PL.adjust.risk, PL.adjust = PL.adjust,  LB.adjust.risk = LB.adjust.risk, LB.adjust = LB.adjust )
+    endoerror.prob <- FUN.adjust(original.risk = endoerror.prob, prevOutcome = outcome[,i], PL.adjust.risk = PL.adjust.risk, PL.adjust = PL.adjust,  LB.adjust.risk = LB.adjust.risk, LB.adjust = LB.adjust )
 
-    spacing.SI <- FUN.spacing(column=i,mydata=result,event="SI",spacing=space.SI)# check spacing of SI
+    spacing.SI <- FUN.spacing(column=i,mydata=outcome,event="SI",spacing=space.SI)# check spacing of SI
 
-    spacing.UI <- FUN.spacing(column=i,mydata=result,event="UI",spacing=space.UI)# check spacing of UI
+    spacing.UI <- FUN.spacing(column=i,mydata=outcome,event="UI",spacing=space.UI)# check spacing of UI
 
   }
 
-  list(result,result.prevLosses)
+  list(outcome,result.prevLosses,result.embryo,result.endometrium)
 
 }
 

@@ -40,11 +40,16 @@ createEndoSim <- function(iter_num=1000,age_range=c(20,45), space_SI = 12){
                                 space.UI = 3, space.SI = space_SI, LB.adjust = F,
                                 LB.adjust.risk= 0.02, PL.adjust = T, PL.adjust.risk= 0.04,
                                 reset.endo = F,PL.adjust.factor=10000,adjust.history = F)
+
+  #simulation <- FUN.simulation(ages = age_range[1]:age_range[2], number.of.cases=iter_num, LB.adjust = F, LB.adjust.risk= 0.02, PL.adjust = T, PL.adjust.risk= 0.04, reset.endo = F,PL.adjust.factor=10000,adjust.history = F)
+  #simulation <- FUN.simulation(number.of.cases=10000,LB.adjust = F, LB.adjust.risk= 0.2, PL.adjust = T, PL.adjust.risk= 0.02, reset.endo = T,PL.adjust.factor=10000,adjust.history = T)
+
   })
 
-  new("EndoSim",iter_num=iter_num,age_range=age_range,simulation=list(outcome=simulation[[1]],losses=simulation[[2]],Abembryo=simulation[[3]],Abendometrium=simulation[[4]]))
+  future_outcome <- futureEndoSim(sim = simulation[[1]])
+  cycles_to_outcome <- cycleToOutcome(obj = simulation[[1]])
 
-
+  new("EndoSim",iter_num=iter_num,age_range=age_range,simulation=list(outcome=simulation[[1]],losses=simulation[[2]],Abembryo=simulation[[3]],Abendometrium=simulation[[4]],futureOutcome=future_outcome, cyclesToOutcome=cycles_to_outcome))
 
 }
 

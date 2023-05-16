@@ -12,12 +12,12 @@ FUN.summary <- function(mysim=test.simulation, ages=20:45){
     mysim1 <- mysim[[1]][,this.start:this.end]
     mysim2 <- mysim[[2]][,this.start:this.end]
 
-    this.UI.result <- melt(table(mysim2[which(mysim1 == "UI")]))
-    this.UI.result <- mutate(this.UI.result,Age=ages[i],Outcome="UI")
+    this.UI.result <- reshape2::melt(table(mysim2[which(mysim1 == "UI")]))
+    this.UI.result <- dplyr::mutate(this.UI.result,Age=ages[i],Outcome="UI")
     colnames(this.UI.result) <- c("PrevLosses","Count","Age","Outcome")
 
-    this.SI.result <- melt(table(mysim2[which(mysim1 == "SI")]))
-    this.SI.result <- mutate(this.SI.result,Age=ages[i],Outcome="SI")
+    this.SI.result <- reshape2::melt(table(mysim2[which(mysim1 == "SI")]))
+    this.SI.result <- dplyr::mutate(this.SI.result,Age=ages[i],Outcome="SI")
     colnames(this.SI.result) <- c("PrevLosses","Count","Age","Outcome")
 
     result <- rbind(result,this.UI.result,this.SI.result)
@@ -52,12 +52,12 @@ FUN.summary.history <- function(mysim=test.simulation, ages=20:45){
     mysim1 <- mysim[[1]][,this.start:this.end]
     mysim3 <- stringr::str_sub(result.history[,this.start:this.end],-14)
 
-    this.UI.result <- melt(table(mysim3[which(mysim1 == "UI")]))
-    this.UI.result <- mutate(this.UI.result,Age=ages[i],Outcome="UI")
+    this.UI.result <- reshape2::melt(table(mysim3[which(mysim1 == "UI")]))
+    this.UI.result <- dplyr::mutate(this.UI.result,Age=ages[i],Outcome="UI")
     colnames(this.UI.result) <- c("History","Count","Age","Outcome")
 
-    this.SI.result <- melt(table(mysim3[which(mysim1 == "SI")]))
-    this.SI.result <- mutate(this.SI.result,Age=ages[i],Outcome="SI")
+    this.SI.result <- reshape2::melt(table(mysim3[which(mysim1 == "SI")]))
+    this.SI.result <- dplyr::mutate(this.SI.result,Age=ages[i],Outcome="SI")
     colnames(this.SI.result) <- c("History","Count","Age","Outcome")
 
     result <- rbind(result,this.UI.result,this.SI.result)

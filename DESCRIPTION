@@ -17,3 +17,5 @@ Imports:
         ggpubr,
         plyr,
         tidyr
+Depends: 
+    R (>= 2.10)
