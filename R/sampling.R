@@ -13,7 +13,7 @@
 #' @param seed Set seed. Default NULL.
 #' @return Table of biopsies
 #' @export
-sampleEndoSim <- function(summary_data, sample_size = NULL, ages=c(30,40), num_prev_losses = 1:5, seed = NULL){
+sampleEndoSim <- function(summary_data, sample_size = NULL, ages=c(30,40), num_prev_losses = 2:5, seed = NULL){
 
   if(!is.null(seed)){
     set.seed(1984)
