@@ -20,7 +20,7 @@ sampleEndoSim <- function(summary_data, sample_size = NULL, ages=c(30,40), num_p
     set.seed(seed)
   }
 
-  subdata <- subset(summary_data, Col.num >= ages[1] & Col.num <= ages[2] & History %in% num_prev_losses & cyclesToOutcome <= max_cycles)
+  subdata <- subset(summary_data, Col.num >= ages[1]*12 & Col.num <= ages[2]*12 & History %in% num_prev_losses & cyclesToOutcome <= max_cycles)
 
   observation_order <- sample(unique(subdata$Row.num))
 
