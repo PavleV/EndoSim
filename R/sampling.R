@@ -102,3 +102,17 @@ summaryEndoSim <- function(outcome,losses,Abembryo,Abendometrium,futureOutcome,c
   return(combined_table)
 
 }
+
+pairedSampling <- function(sim_object,sampling_object, sep_cycles = 1){
+
+    new_sampling <- sim_object@simulation$summary
+    new_sampling$Col.num <- new_sampling$Col.num + sep_cycles
+
+    result <- merge(new_sampling,sim.sample,by=c("Row.num","Col.num"))
+
+    result$combinedEndometrium <- paste0(AbEndometrium.x,"_",AbEndometrium.y)
+
+    return(result)
+
+}
+
