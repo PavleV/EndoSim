@@ -119,7 +119,7 @@ pairedSampling <- function(sim_object,sampling_object, sep_cycles = 1){
 
     result <- merge(new_sampling,sim.sample,by=c("Row.num","Col.num"))
 
-    result$combinedEndometrium <- paste0(AbEndometrium.x,"_",AbEndometrium.y)
+    result$combinedEndometrium <- paste0(result$AbEndometrium.x,"_",result$AbEndometrium.y)
 
     return(result)
 
