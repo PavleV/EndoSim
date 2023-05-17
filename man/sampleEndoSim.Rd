@@ -8,7 +8,8 @@ sampleEndoSim(
   summary_data,
   sample_size = NULL,
   ages = c(30, 40),
-  num_prev_losses = 1:5,
+  num_prev_losses = 2:5,
+  max_cycles = 12,
   seed = NULL
 )
 }
@@ -20,6 +21,8 @@ sampleEndoSim(
 \item{ages}{Age range for sampling.}
 
 \item{num_prev_losses}{Number of previous losses for sampling.}
+
+\item{max_cycles}{Maximum number of cycles to outcome}
 
 \item{seed}{Set seed. Default NULL.}
 }
