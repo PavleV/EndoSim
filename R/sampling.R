@@ -10,16 +10,17 @@
 #' @param sample_size Number of biopsies to retrieve from simulation. Default NULL.
 #' @param ages Age range for sampling.
 #' @param num_prev_losses Number of previous losses for sampling.
+#' @param max_cycles Maximum number of cycles to outcome
 #' @param seed Set seed. Default NULL.
 #' @return Table of biopsies
 #' @export
-sampleEndoSim <- function(summary_data, sample_size = NULL, ages=c(30,40), num_prev_losses = 2:5, seed = NULL){
+sampleEndoSim <- function(summary_data, sample_size = NULL, ages=c(30,40), num_prev_losses = 2:5, max_cycles = 12, seed = NULL){
 
   if(!is.null(seed)){
-    set.seed(1984)
+    set.seed(seed)
   }
 
-  subdata <- subset(summary_data, Col.num >= ages[1] & Col.num <= ages[2] & History %in% num_prev_losses & cyclesToOutcome <= 24)
+  subdata <- subset(summary_data, Col.num >= ages[1] & Col.num <= ages[2] & History %in% num_prev_losses & cyclesToOutcome <= max_cycles)
 
   observation_order <- sample(unique(subdata$Row.num))
 
