@@ -376,7 +376,11 @@ FUN.simulation3 <- function(ages = 20:45, number.of.cases = 1000, beta.shape1 = 
 FUN.simulation4 <- function(ages = 20:45, number.of.cases = 1000, beta.shape1 = 1, beta.shape2 = 30,
                             aneuploid.table= Aneuploid_table_fitted_3day_210212, space.UI = 3, space.SI = 12,
                             LB.adjust = T, LB.adjust.risk= 0, PL.adjust = T, PL.adjust.risk= 0,
-                            reset.endo = F, reset.prob = 0.1, adjust.history = F, PL.adjust.factor=1000){
+                            reset.endo = F, reset.prob = 0.1, adjust.history = F, PL.adjust.factor=1000, seed=NULL){
+
+  if(!is.null(seed)){
+    set.seed(seed)
+  }
 
   # set up result matrices.
   # Main outcome matrix keeps track of UI and SI events with each cycle.

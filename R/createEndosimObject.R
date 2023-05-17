@@ -28,9 +28,10 @@ setClass("EndoSim", slots=list(iter_num="numeric",age_range="numeric",simulation
 #' @param iter_num Number of iterations of the simulation. Default value = 1000.
 #' @param age_range Range of ages. Default value = c(20,45).
 #' @param space_SI Number of cycles between successful implantations. Default value = 12.
+#' @param seed Set seed. Default value = NULL.
 #' @return An EndoSim object
 #' @export
-createEndoSim <- function(iter_num=1000,age_range=c(20,45), space_SI = 12){
+createEndoSim <- function(iter_num=1000,age_range=c(20,45), space_SI = 12, seed=NULL){
 
   suppressWarnings({
 
@@ -39,7 +40,7 @@ createEndoSim <- function(iter_num=1000,age_range=c(20,45), space_SI = 12){
                                 aneuploid.table = Aneuploid_table_fitted_3day_210212,
                                 space.UI = 3, space.SI = space_SI, LB.adjust = F,
                                 LB.adjust.risk= 0.02, PL.adjust = T, PL.adjust.risk= 0.04,
-                                reset.endo = F,PL.adjust.factor=10000,adjust.history = F)
+                                reset.endo = F,PL.adjust.factor=10000,adjust.history = F, seed=seed)
 
   #simulation <- FUN.simulation(ages = age_range[1]:age_range[2], number.of.cases=iter_num, LB.adjust = F, LB.adjust.risk= 0.02, PL.adjust = T, PL.adjust.risk= 0.04, reset.endo = F,PL.adjust.factor=10000,adjust.history = F)
   #simulation <- FUN.simulation(number.of.cases=10000,LB.adjust = F, LB.adjust.risk= 0.2, PL.adjust = T, PL.adjust.risk= 0.02, reset.endo = T,PL.adjust.factor=10000,adjust.history = T)
