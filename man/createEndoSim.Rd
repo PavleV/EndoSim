@@ -4,7 +4,12 @@
 \alias{createEndoSim}
 \title{Create an EndoSim simulation object}
 \usage{
-createEndoSim(iter_num = 1000, age_range = c(20, 45), space_SI = 12)
+createEndoSim(
+  iter_num = 1000,
+  age_range = c(20, 45),
+  space_SI = 12,
+  seed = NULL
+)
 }
 \arguments{
 \item{iter_num}{Number of iterations of the simulation. Default value = 1000.}
@@ -12,6 +17,8 @@ createEndoSim(iter_num = 1000, age_range = c(20, 45), space_SI = 12)
 \item{age_range}{Range of ages. Default value = c(20,45).}
 
 \item{space_SI}{Number of cycles between successful implantations. Default value = 12.}
+
+\item{seed}{Set seed. Default value = NULL.}
 }
 \value{
 An EndoSim object
