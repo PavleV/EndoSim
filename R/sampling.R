@@ -103,6 +103,15 @@ summaryEndoSim <- function(outcome,losses,Abembryo,Abendometrium,futureOutcome,c
 
 }
 
+#' Summarise paired samples in an EndoSim simulation object
+#'
+#' This function created paired sample data from EndoSim simulation object.
+#'
+#' @param sim_object An outcome slot from simulation object (required).
+#' @param sampling_object A sampling object (required).
+#' @param sep_cycles Number of cycles between samplings. Default value 1.
+#' @return Expanded sampling object with paired data.
+#' @export
 pairedSampling <- function(sim_object,sampling_object, sep_cycles = 1){
 
     new_sampling <- sim_object@simulation$summary

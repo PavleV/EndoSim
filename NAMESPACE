@@ -3,4 +3,5 @@
 export(createEndoSim)
 export(cycleToOutcome)
 export(futureEndoSim)
+export(pairedSampling)
 export(sampleEndoSim)
